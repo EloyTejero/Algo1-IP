@@ -1,0 +1,3 @@
+correr test: coverage report -m ejercicios.py
+correr report: coverage report -m ejercicios.py
+correr report xml/html: coverage [xml|html]
