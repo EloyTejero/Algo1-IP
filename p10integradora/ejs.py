@@ -1,3 +1,5 @@
+from queue import Queue, LifoQueue
+
 #veterinaria
 #ej 1 
 def stock_productos(stock_cambios:list[tuple[str,int]]) -> dict[str,tuple[int,int]]:
@@ -182,3 +184,214 @@ def escape_en_solitario(amigos_por_sala:list[list[int]]) -> list[int]:
 
 #ej 9
 
+def torneo_de_gallinas(estrategias:dict[str,str]) -> dict[str,int]:
+    resultados:dict[str,int] = {}
+    for jugador in estrategias.keys():
+        estrategia_jugador:str = estrategias[jugador]
+        resultados[jugador] = 0
+        for otro_jugador in estrategias.keys():
+            if otro_jugador != jugador:
+                estrategia_otro_jugador:str = estrategias[otro_jugador]
+                if estrategia_jugador == estrategia_otro_jugador:
+                    if estrategia_jugador == "d":
+                        resultados[jugador] -= 10
+                    elif estrategia_jugador == "nd":
+                        resultados[jugador] -= 5    
+                else:
+                    if estrategia_jugador == "d":
+                        resultados[jugador] -= 15
+                    else:
+                        resultados[jugador] += 10
+    return resultados
+#print(torneo_de_gallinas({"n":"d", "n1":"nd","n2":"nd"}))
+
+#ej10
+def reordenar_cola_priorizando_vips(filaClientes:Queue[tuple[str,str]]) -> Queue[str]:
+    copia_cola:Queue[tuple[str,str]] = Queue()
+    res:Queue[str] = Queue()
+    cola_vip:Queue[str] = Queue()
+    cola_comun:Queue[str] = Queue()
+    elementos:list[tuple[str,str]] = []
+
+    while not filaClientes.empty():
+        elementos.append(filaClientes.get())
+    for i in elementos:
+        copia_cola.put(i)
+        filaClientes.put(i)
+    
+    while not copia_cola.empty():
+        item:tuple[str,str] = copia_cola.get()
+        if item[1] == "vip":
+            cola_vip.put(item[0])
+        else:
+            cola_comun.put(item[0])
+
+    while not cola_vip.empty():
+        res.put(cola_vip.get())
+
+    while not cola_comun.empty():
+        res.put(cola_comun.get())
+
+    return res
+
+#cola:Queue[tuple[str,str]] = Queue()
+#cola.put(("ana", "comun"))
+#cola.put(("juli", "vip"))
+#cola.put(("fede", "vip"))
+#cola_res:Queue[str] = reordenar_cola_priorizando_vips(cola)
+#while not cola_res.empty():
+#    print(cola_res.get())
+#funciona god
+
+#ej 11
+def obtener_sufijos(palabra:str) -> list[str]:
+    sufijos:list[str] = []
+    for i in range(len(palabra)):
+        sufijo:str = ""
+        for j in range(i,len(palabra)):
+            sufijo += palabra[j]
+        sufijos.append(sufijo)
+    return sufijos
+def es_palindromo(texto:str) -> bool:
+    for i in range(len(texto)):
+        if texto[i] != texto[len(texto)-i-1]:
+            return False
+    return True
+def cuantos_sufijos_son_palindromos(texto:str) -> int:
+    sufijos:list[str] = obtener_sufijos(texto)
+    cont:int = 0
+    for i in sufijos:
+        if es_palindromo(i):
+            cont += 1
+    return cont
+
+#print(cuantos_sufijos_son_palindromos("lobo")) # palindromos "obo" y "o"
+
+#ej12
+def quien_gano_el_tateti_facilito(matriz:list[list[str]]) -> int:
+    columnas_iguales:str = ""
+    for i in range(len(matriz[0])):
+        ultimo:chr = matriz[0][i]
+        cont:int = 0
+        for j in range(len(matriz)):
+            if matriz[j][i] != ultimo:
+                cont = 1
+                ultimo = matriz[j][i]
+            else:
+                cont += 1
+                if cont == 3:
+                    columnas_iguales += matriz[j][i]
+                    cont = 0
+    if len(columnas_iguales) > 1:
+        return 3
+    if columnas_iguales == "x":
+        return 1
+    if columnas_iguales == "o":
+        return 2
+    if columnas_iguales == "":
+        return 0
+    
+#print(quien_gano_el_tateti_facilito([
+ #   ['x', '', '', 'o',''],
+  #  ['' , '', '', '',''],
+   # ['x', '', 'o', 'o',''],
+    #['' , '', 'o', '',''],
+    #['x', '', 'x', '','']
+#]))
+
+#ej 13
+def orden_de_atencion(urgentes:Queue[int], postergables:Queue[int]) -> Queue[int]:
+    res:Queue[int] = Queue()
+    copia_urgentes:Queue[int] = Queue()
+    copia_postergables:Queue[int] = Queue()
+    aux:Queue[int] = Queue()
+    while not urgentes.empty():
+        aux.put(urgentes.get())
+    while not aux.empty():
+        e:int = aux.get()
+        copia_urgentes.put(e)
+        urgentes.put(e)
+    while not postergables.empty():
+        aux.put(postergables.get())
+    while not aux.empty():
+        e:int = aux.get()
+        copia_postergables.put(e)
+        postergables.put(e)
+    while not copia_postergables.empty():
+        res.put(copia_urgentes.get())
+        res.put(copia_postergables.get())
+
+    return res
+
+#cola_urgentes:Queue[int] = Queue()
+#cola_urgentes.put(1)
+#cola_urgentes.put(2)
+#cola_postergables:Queue[int] = Queue()
+#cola_postergables.put(3)
+#cola_postergables.put(4)
+#cola_res:Queue[int] = orden_de_atencion(cola_urgentes, cola_postergables)
+#while not cola_res.empty():
+#    print(cola_res.get())
+
+#ej 14
+def alarma_epidemiologica(registros:dict[int,str], infecciosas:list[str], umbral:float) -> dict[str, float]:
+    res:dict[str,float] = {}
+    cant_por_enfermedad:list[tuple[str,int]] = []
+    for enfermedad in infecciosas:
+        cant_enfermedad:int = 0
+        for paciente in registros.keys():
+            if registros[paciente] == enfermedad:
+                cant_enfermedad += 1
+        if cant_enfermedad > 0:
+            cant_por_enfermedad.append((enfermedad,cant_enfermedad))
+
+    cant_registros:int = 0
+    for i in registros.keys():
+        cant_registros += 1
+    
+    for i in cant_por_enfermedad:
+        porcentaje:float = i[1]/cant_registros
+        if porcentaje >= umbral:
+            res[i[0]] = porcentaje
+    
+    return res
+
+#print(alarma_epidemiologica({1:"e1",2:"e2",3:"e1"},["e1","e2"],0.3))
+
+#ej15
+def empleados_del_mes(horas:dict[int,list[int]]) -> list[int]:
+    res:list[int] = []
+    horas_totales:dict[int,int] = {}
+    max_horas:int = 0
+    for empleado in horas.keys():
+        horas_empleado:list[int] = horas[empleado]
+        max_horas_empleado:int = 0
+        for i in horas_empleado:
+            max_horas_empleado += i
+        if max_horas_empleado > max_horas:
+            max_horas = max_horas_empleado
+            horas_totales[empleado] = max_horas_empleado
+        if max_horas_empleado == max_horas:
+            horas_totales[empleado] = max_horas_empleado
+    
+    for empleado in horas_totales.keys():
+        if horas_totales[empleado] == max_horas:
+            res.append(empleado)
+
+    return res
+
+#print(empleados_del_mes({1:[1,2,3],2:[3,3],3:[1,1,1],4:[6]}))
+
+#ej 16
+def nivel_de_ocupacion(camas_por_piso:list[list[bool]])-> list[float]:
+    res:list[float] = []
+    for piso in camas_por_piso:
+        ocupadas:int = 0
+        total:int = len(piso)
+        for cama in piso:
+            if cama:
+                ocupadas += 1
+        res.append(ocupadas/total)
+    return res
+
+#print(nivel_de_ocupacion([[True,False,True],[False, False, True],[True, True, True]]))
